@@ -41,7 +41,14 @@ Cette commande permet d’afficher la liste des conteneurs Docker en cours d'ex�
 ---
 docker ps -a
 ---
-Sert à voir tous les conteneurs, qu'ils soient actifs ou non.
+Sert à voir tous les conteneurs, qu'ils soient actifs ou non.  
+Elle montre des informations comme :
+* l'ID du conteneur
+* l'image utilisée
+* l'état (en cours d'exécution ou stoppé)
+* la commande lancée
+* les ports
+* la durée d'exécution
 <br>
 
 ---
@@ -108,6 +115,110 @@ __Intérêts:__
 * Locals ou distants
 
 ![Volume](volume_dck.png)
+
+---
+docker volume ls
+---
+Cette commande affiche la liste de tous les volumes Docker présents sur la machine.  
+Elle nous montre les noms des volumes créés, ce qui permet de savoir quels espaces de stockage persistent sont disponibles.
+<br>
+
+---
+docker volume create mynginx
+---
+Cette commande crée un volume Docker nommé mynginx.  
+Ce volume servira à stocker des données de façon persistante, par exemple pour un conteneur Nginx, afin que les données restent même si le conteneur est supprimé.
+<br>
+
+---
+docker run -d --name c1 -v mynginx:/usr/share/ngninx/html/ ngninx:latest 
+---
+Elle monte un volume Docker nommé mynginx dans le dossier /usr/share/nginx/html/ du conteneur, qui est l’emplacement où Nginx sert les fichiers web. Grâce à ce montage, les fichiers stockés dans le volume persistent indépendamment du conteneur, ce qui permet de conserver les données même si le conteneur est arrêté ou supprimé.
+<br>
+
+---
+docker exec -ti c1 bash
+---
+Cette commande permet d’ouvrir un terminal interactif (bash) dans le conteneur c1.  
+Concrètement, elle nous donne un accès direct à l’intérieur du conteneur pour exécuter des commandes Linux comme si on était connecté sur une machine normale.
+<br>
+
+---
+docker volume inspect ngninx
+---
+Cette commande permet d’afficher les détails du volume Docker ngninx.  
+Elle te montre des informations précises, comme :
+* le chemin exact où le volume est stocké sur ta machine
+* le nom du volume
+* le type de volume
+* d'autres métadonnées
+<br>
+
+### Types de Docker Volumes
+![Types of docker volume](vol_types.png)
+On a déjà vu précédemment le *Docker Volume*, parlons tout de suite le *Bind Mount*.
+<br>
+<br>
+#### Bind Mount
+Le Bind Mount est un type de volume Docker qui permet de monter un dossier directement depuis la machine (l'hôte) vers un conteneur Docker.  
+__Comment ça marche?__
+* On indique un chemin absolu sur la machine
+* Ce dossier devient accessible à l'intérieur du conteneur dans un dossier qu'on choisis
+* Toute modification dans ce dossier (dans le conteneur ou sur la machine) sera immédiatement visible des deux côtés
+<br>
+
+__*Voici un exemple*__
+---
+sudo mkdir /data  
+sudo mkdir /data2  
+sudo touch /data/Hello  
+sudo mount --bind /data/ /data2  
+sudo findmnt 
+---  
+On s'intéresse sur la 4ème ligne de commande;  
+* Cela fait pointer /data2 vers /data.
+* Les deux répertoires deviennent identiques : ce qu'on met dans /data apparaît dans /data2, et inversement
+* C'est comme un raccourci monté ou un "miroir" au niveau du système de fichiers
+* Très utilisé pour :
+    * Accéder à un dossier à partir de plusieurs emplacements
+    * Sécuriser l’accès à un sous-dossier sans déplacer les fichiers
+
+Pour la 5ème ligne, elle affiche tous les systèmes de fichiers montés et on y verra une ligne montrant que /data est monté aussi sur /data2.  
+
+<br>
+<br>
+<br>
+Lorsqu'on réalise un montage d'un volume, on va avoir 2 comportements différents:  
+* Pour le cas de *Bind Mount*, on va surcharger les datas à partir des données sources du volume sur notre image donc on va écraser potontiellemnt les données qui sont présentes dans l'image au niveau de notre montage
+* En revanche, pour le *Docker Volume*, c'est l'inverse, c'est à dire qu'on va prendre ce qui est dans l'image et ça va venir alimenter le volume qu'on va créer à l'extérieur varlip docker volume...   
+<br>
+
+__Bind Mount__
+---
+docker run -d --name c1 --mount type=bind,source=/data/,destination=/usr/share/nginx/html/ nginx:latest
+---
+Cette commande lance un conteneur Nginx en arrière-plan et relie le dossier /data/ de la machine au dossier web /usr/share/nginx/html/ du conteneur. Ainsi, les fichiers dans /data/ sont directement servis par Nginx. C’est un Bind Mount qui facilite le partage de fichiers entre l’hôte et le conteneur.  
+Et si on lance la commande __*docker inspect --format "{{.Mounts}}" c1*__ après, elle inspecte le conteneur c1 pour afficher uniquement les informations sur les montages (volumes et Bind Mounts). Et elle affichera:  
+* Le type de montage (bind ou volume)
+* Le chemin sur l’hôte (Source)
+* Le chemin dans le conteneur (Destination)
+* Les options associées  
+<br>
+
+__Docker Volume__
+---
+docker run -d --name c2 --mount type=volume,source=mynginx,destination=/usr/share/nginx/html/ nginx:latest
+---
+Lors de cette étape, nous avons constaté que les résultats obtenus sont similaires à ceux que nous avions déjà rencontrés précédemment. Cela confirme que le fonctionnement reste identique et que les concepts abordés auparavant s'appliquent toujours ici.
+
+
+
+
+
+
+
+
+
 
 
 
