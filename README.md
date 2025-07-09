@@ -220,7 +220,10 @@ __*Ses différents types ou mode de réseaux*__ : bridge, host, none, overlay, .
 
 1. Bridge
 Le mode bridge est le mode réseau par défaut de Docker lorsqu'on crée un conteneur. Il permet à plusieurs conteneurs de communiquer entre eux sur un réseau privé isolé, tout en restant séparés du réseau principal de l’hôte (ton ordinateur/serveur).
-![Types of docker volume](vol_types.png)
+<br>
+![Bridge](bridge.png)
+<br>
+
 Le bridge par défaut pour docker c'est docker0 avec une IP 172.17.0.1/16 (configurable)
 Il exiqte plusieurs manières de le visualiser sur notre host sur lequel on a installé docker:  
    * __ip a__
