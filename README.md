@@ -305,8 +305,17 @@ Le résulat ping à partir de quel DNS? Donc on y trouve le conteneur c1.réseau
 <br>
 <br>
   
-## Docker commit
-C'est une commande qui est généralement peu connu et qui permet de créer des images pas forcement de la meilleure manière
+## Dockerfile
+Un Dockerfile est un fichier texte qui contient des instructions pour construire une image Docker personnalisée. Il sert à automatiser la création d’images Docker.  
+Dans ce fichier, tu indiques :  
+* Quelle image de base utiliser (par exemple : Debian, Ubuntu, Nginx…)
+* Quelles commandes exécuter à l’intérieur (installer des logiciels, copier des fichiers, etc.)
+* Quelle application démarrer dans le conteneur
+<br>
+
+Voici les instructions de Dockerfile
+
+
 
 
 
