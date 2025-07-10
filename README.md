@@ -215,10 +215,10 @@ Lors de cette étape, nous avons constaté que les résultats obtenus sont simil
 
 ## Docker Networks
 C'est un élément important pour le foctionnement des conteneurs à la fois pour la communications entre conteneurs mais également pour les entrées et sorties au niveau des flux entre le conteneur et l'extérieur de la machine host.  
-__*Ses différents types ou mode de réseaux*__ : bridge, host, none, overlay, ...
+<br>
 <br>
 
-1. Bridge
+1. Bridge  
 Le mode bridge est le mode réseau par défaut de Docker lorsqu'on crée un conteneur. Il permet à plusieurs conteneurs de communiquer entre eux sur un réseau privé isolé, tout en restant séparés du réseau principal de l’hôte (ton ordinateur/serveur).
 <br>
 ![Bridge](bridge.png)
@@ -230,8 +230,83 @@ Il exiqte plusieurs manières de le visualiser sur notre host sur lequel on a in
    * __sudo ifconfig__
    * __docker network ls__
 
+Maitenant créons un conteneur
+__docker run --name c1 -d debian sleep infinity__  
+Ceci démarre un conteneur Debian c1 en arrière-plan, sans qu'il se ferme tout seul, car il exécute une commande qui ne s'arrête jamais. 
+<br>
 
+*Pourquoi utiliser cette commande?*  
+Très pratique pour créer un conteneur de test "vide", où on peut entrer plus tard avec :  
+__docker exec -ti c1 bash__  
+On ouvre un terminal directement dans le conteneur Debian c1.  
+On se retrouve "à l’intérieur" du conteneur, comme si c'était une petite machine virtuelle Debian et on va visualiser les IP.  
+<br>
 
+D'abord il faut installer la commande *ip*, donc voici la commande:  
+__apt install iputils-ping net-tools__  
+Dans un conteneur Debian, la commande apt install iputils-ping net-tools permet d’installer des outils réseau essentiels pour le diagnostic et les tests. Le paquet iputils-ping fournit la commande ping, qui permet de tester la connectivité réseau en envoyant des paquets ICMP à une adresse IP ou un nom de domaine, afin de vérifier si la machine cible répond. Quant au paquet net-tools, il contient plusieurs commandes réseau classiques telles que ifconfig pour afficher et configurer les interfaces réseau, netstat pour examiner les connexions et ports ouverts, ainsi que d’autres outils comme route et arp. Ces outils sont particulièrement utiles à l’intérieur d’un conteneur pour vérifier l’état du réseau, observer les interfaces et s’assurer de la connectivité avec d’autres conteneurs ou avec l’extérieur. Cependant, ils ne sont pas inclus par défaut dans les images Docker minimales afin de réduire la taille de l’image et ne sont installés que si nécessaire.  
+<br>
+
+Et si on lance maintenant la commande __ifconfig__ dans ce bash, on y trouve:  
+* Les interfaces réseau actives (exemple : eth0, lo, docker0)
+* Les adresses IP attribuées
+* Les adresses MAC
+* Le masque de sous-réseau
+* L’état des interfaces (UP/DOWN)
+* Les statistiques de paquets réseau (envoyés, reçus, erreurs, etc.)  
+<br>
+<br>
+
+2. Lignes de commandes didiée au réseau
+Le but c'est de créer notre propre réseau et de ne pas utliser docker0. Le docker0 ne permet pas de bénéficier de ce qu'on va voir c'est à dire la résolution de DNS à travers d'un nom de conteneur et qui va permettre de fournir tout de suite une IP.
+<br>
+
+---
+docker network ls
+---
+Ceci permet d’afficher la liste de tous les réseaux Docker présents sur la machine. Chaque fois que Docker est installé, il crée automatiquement plusieurs réseaux par défaut, dont bridge, host et none. Le réseau bridge qu'on a déjà vu précédemment, le réseau host permet au conteneur d’utiliser directement le réseau de la machine hôte, sans isolation réseau; tandis que le réseau none désactive tout accès réseau pour le conteneur.  
+<br>
+
+---
+docker network create --driver=bridge --subnet=192.168.0.0/24 réseau1
+---
+Cette commande sert à créer un réseau Docker privé nommé réseau1 avec le mode bridge et une plage d’adresses IP allant de 192.168.0.1 à 192.168.0.254. Elle permet aux conteneurs connectés à ce réseau de communiquer entre eux dans un sous-réseau isolé.  
+<br>
+
+---
+docker network inspect réseau1
+---
+Cette commande affiche tous les détails du réseau Docker réseau1.  
+Elle montre des informations comme :  
+   * Le type de réseau (bridge)
+   * Le sous-réseau utilisé (ici 192.168.0.0/24)
+   * Les adresses IP attribuées
+   * Les conteneurs connectés à ce réseau
+   * La passerelle (gateway) du réseau  
+<br>
+
+---
+docker run -d --name c1 --network réseau1 nginx:latest
+---
+Elle permet d’exécuter un conteneur Nginx, déjà connecté au réseau privé réseau1 qu'on a créé avant.  
+<br>
+
+Créons un autre conteneur Nginx nommé c2, donc:  
+___docker run -d --name c2 --network réseau1 nginx:latest___  
+Ouvrons maitenant un terminal interactif dans ce conteneur d’y lancer un shell bash:  
+__docker exec -ti c2__  
+   > *apt install iputils-ping* : cette commande installe le paquet iputils-ping, qui fournit l’outil ping.
+L'outil ping permet de :
+* Tester la connectivité réseau vers une autre machine ou un autre conteneur
+* Envoyer des paquets ICMP pour vérifier si la destination répond
+* Mesurer le temps de réponse (latence) entre les deux machines
+   > *ping c1* : sert à tester la connexion réseau entre conteneurs Docker c2, tant qu’ils sont sur le même réseau.
+Le résulat ping à partir de quel DNS? Donc on y trouve le conteneur c1.réseau1, donc c'est ça le DNS; c'est à dire le nom d'un conteneur suivi d'un "." et suivi du nom du réseau custom qu'on a utilisé pour notre conteneur.  
+<br>
+<br>
+  
+## Docker commit
+C'est une commande qui est généralement peu connu et qui permet de créer des images pas forcement de la meilleure manière
 
 
 
