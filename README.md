@@ -295,19 +295,19 @@ Créons un autre conteneur Nginx nommé c2, donc:
 ___docker run -d --name c2 --network réseau1 nginx:latest___  
 Ouvrons maitenant un terminal interactif dans ce conteneur d’y lancer un shell bash:  
 __docker exec -ti c2__  
-   > *apt install iputils-ping* : cette commande installe le paquet iputils-ping, qui fournit l’outil ping.
-L'outil ping permet de :
-* Tester la connectivité réseau vers une autre machine ou un autre conteneur
-* Envoyer des paquets ICMP pour vérifier si la destination répond
-* Mesurer le temps de réponse (latence) entre les deux machines
-   > *ping c1* : sert à tester la connexion réseau entre conteneurs Docker c2, tant qu’ils sont sur le même réseau.
+   > *apt install iputils-ping* : cette commande installe le paquet iputils-ping, qui fournit l’outil ping.  
+   > L'outil ping permet de :
+   > * Tester la connectivité réseau vers une autre machine ou un autre conteneur
+   > * Envoyer des paquets ICMP pour vérifier si la destination répond
+   > * Mesurer le temps de réponse (latence) entre les deux machines  
+> *ping c1* : sert à tester la connexion réseau entre conteneurs Docker c2, tant qu’ils sont sur le même réseau.
 Le résulat ping à partir de quel DNS? Donc on y trouve le conteneur c1.réseau1, donc c'est ça le DNS; c'est à dire le nom d'un conteneur suivi d'un "." et suivi du nom du réseau custom qu'on a utilisé pour notre conteneur.  
 <br>
 <br>
   
 ## Dockerfile
 Le Dockerfile est comme une recette de cuisine : chaque instruction a son rôle pour créer une image Docker personnalisée, prête à être utilisée. Il sert à automatiser la création d’images Docker.  
-Dans ce fichier, tu indiques :  
+Dans ce fichier, on indique :  
 * Quelle image de base utiliser (par exemple : Debian, Ubuntu, Nginx…)
 * Quelles commandes exécuter à l’intérieur (installer des logiciels, copier des fichiers, etc.)
 * Quelle application démarrer dans le conteneur
@@ -315,7 +315,7 @@ Dans ce fichier, tu indiques :
 
 Voici les instructions de Dockerfile
 ![from](dckf_from.png)
-![workdir](dcckf_workdir.png)
+![workdir](dckf_workdir.png)
 ![arg](dckf_arg.png)
 ![env](dckf_env.png)
 ![user](dckf_user.png)
@@ -327,6 +327,58 @@ Voici les instructions de Dockerfile
 ![label](dckf_label.png)
 ![expose](dckf_expose.png)
 ![volume](dckf_volume.png)
+<br>
+<br>
+
+__Voici quelques commandes__  
+---
+docker build -t myimage .
+--
+Cette commande sert à construire une image Docker à partir d’un Dockerfile dans le dossier courant, et à lui attribuer le nom myimage.
+<br>
+
+---
+docker images
+---
+Cette commande affiche la liste de toutes les images Docker qui sont actuellement présentes sur la machine.
+<br>
+
+---
+docker run -d -p 8080:80 myimage
+---
+Cette commande lance un conteneur basé sur l’image myimage et rend l’application à l’intérieur accessible via le port 8080 de la machine.
+<br>
+
+---
+docker run -d --name c1 myimage
+---
+Exécuter un conteneur avec l’image.  
+Elle permet de lancer le conteneur *c1* en arrière-plan à partir de l'image Docker *myimage*.
+<br>
+
+---
+docker rmi -f myimage
+---
+Cette commande force la suppression immédiate de l’image myimage, même si elle est encore utilisée par des conteneurs.
+<br>
+<br>
+
+
+## Docker Layers
+Une Docker layer (ou "couche Docker") est une étape intermédiaire générée lors de la construction d'une image Docker.  
+Chaque instruction dans un Dockerfile (par exemple FROM, RUN, COPY, etc.) crée une nouvelle couche.  
+__*Comment ça fonctionne ?*__  
+* Docker construit l'image étape par étape.
+* À chaque instruction du Dockerfile, il crée une nouvelle couche: lorsqu’on construit une image Docker avec un Dockerfile, Docker lit chaque instruction une par une.
+* Chaque couche contient les modifications faites par cette étape
+* Ces couches sont ensuite empilées pour former l'image complète
+
+
+__*Pourquoi c’est utile ?*__  
+* Réutilisation : Si une couche ne change pas, Docker la garde en cache lors des reconstructions → la construction devient plus rapide.
+* Optimisation : Plusieurs images peuvent partager des couches communes pour économiser de l’espace disque.
+* Isolation : Chaque couche est indépendante, Docker les assemble pour créer l’image finale.
+
 
 
 
