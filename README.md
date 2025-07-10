@@ -306,7 +306,7 @@ Le résulat ping à partir de quel DNS? Donc on y trouve le conteneur c1.réseau
 <br>
   
 ## Dockerfile
-Un Dockerfile est un fichier texte qui contient des instructions pour construire une image Docker personnalisée. Il sert à automatiser la création d’images Docker.  
+Le Dockerfile est comme une recette de cuisine : chaque instruction a son rôle pour créer une image Docker personnalisée, prête à être utilisée. Il sert à automatiser la création d’images Docker.  
 Dans ce fichier, tu indiques :  
 * Quelle image de base utiliser (par exemple : Debian, Ubuntu, Nginx…)
 * Quelles commandes exécuter à l’intérieur (installer des logiciels, copier des fichiers, etc.)
@@ -314,7 +314,19 @@ Dans ce fichier, tu indiques :
 <br>
 
 Voici les instructions de Dockerfile
-
+![from](dckf_from.png)
+![workdir](dcckf_workdir.png)
+![arg](dckf_arg.png)
+![env](dckf_env.png)
+![user](dckf_user.png)
+![add](dckf_add.png)
+![copy](dckf_copy.png)
+![run](dckf_run.png)
+![cmd](dckf_cmd.png)
+![entrypoint](dckf_entrypoint.png)
+![label](dckf_label.png)
+![expose](dckf_expose.png)
+![volume](dckf_volume.png)
 
 
 
